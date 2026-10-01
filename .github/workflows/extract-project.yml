@@ -1,0 +1,64 @@
+name: Extract IOE Project
+
+on:
+  push:
+    paths:
+      - 'IOE-Creative-Studio-GitHub-Ready.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          rm -rf /tmp/ioe-project
+          mkdir -p /tmp/ioe-project
+
+          unzip -o "IOE-Creative-Studio-GitHub-Ready.zip" -d /tmp/ioe-project
+
+          echo "Extracted files:"
+          find /tmp/ioe-project -maxdepth 3 -type f | head -100
+
+      - name: Find project root
+        run: |
+          PROJECT_ROOT=$(dirname "$(find /tmp/ioe-project -name package.json -type f | head -1)")
+
+          if [ -z "$PROJECT_ROOT" ] || [ "$PROJECT_ROOT" = "." ]; then
+            echo "Could not find package.json inside the ZIP."
+            exit 1
+          fi
+
+          echo "PROJECT_ROOT=$PROJECT_ROOT" >> "$GITHUB_ENV"
+          echo "Project root: $PROJECT_ROOT"
+
+      - name: Copy project files
+        run: |
+          rsync -av \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.env' \
+            --exclude='.env.local' \
+            --exclude='node_modules/' \
+            "$PROJECT_ROOT/" ./
+
+      - name: Commit extracted project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "No new files to commit."
+          else
+            git commit -m "Extract GitHub-ready IOE Creative Studio project"
+            git push
+          fi
