@@ -1,5 +1,10 @@
 name = "ioe-creative-studio"
+main = "worker.ts"
 compatibility_date = "2026-09-28"
 
 [assets]
 directory = "./dist"
+not_found_handling = "single-page-application"
+
+[vars]
+BACKEND_URL = "https://ais-pre-hqypc5i7hmgdjlxp3tzmxt-174724498018.europe-west2.run.app"

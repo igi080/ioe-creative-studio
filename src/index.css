@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-shimmer: shimmer 2s linear infinite;
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+}
+
+body {
+  background-color: #ffffff;
+  color: #0f172a;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #0f172a;
+}
+
+@media print {
+  /* Hide application chrome, navigation, and floating widgets */
+  nav,
+  footer,
+  aside,
+  .print-hidden,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    overflow: visible !important;
+  }
+
+  /* Optimize document view for paper & PDF export */
+  #legal-document-view {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: auto !important;
+    background: transparent !important;
+  }
+
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  p, li, blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  table, pre, blockquote {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
