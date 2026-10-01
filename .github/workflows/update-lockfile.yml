@@ -1,4 +1,4 @@
-name: Update npm lockfile
+name: Regenerate npm lockfile
 
 on:
   workflow_dispatch:
@@ -7,18 +7,31 @@ permissions:
   contents: write
 
 jobs:
-  update-lockfile:
+  regenerate-lockfile:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update package-lock.json
-        run: | 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Remove old lockfile
+        run: rm -f package-lock.json
+
+      - name: Generate fresh lockfile
+        run: |
           npm install --package-lock-only --include=optional --ignore-scripts
 
-      - name: Commit updated lockfile
+      - name: Verify lockfile
+        run: |
+          npm ci --include=optional --ignore-scripts
+
+      - name: Commit lockfile
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -26,8 +39,8 @@ jobs:
           git add package-lock.json
 
           if git diff --cached --quiet; then
-            echo "package-lock.json is already up to date."
+            echo "No lockfile changes."
           else
-            git commit -m "Update npm lockfile"
+            git commit -m "Regenerate complete npm lockfile"
             git push
           fi
