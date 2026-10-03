@@ -22,31 +22,53 @@ jobs:
           rm -rf /tmp/ioe-project
           mkdir -p /tmp/ioe-project
 
-          unzip -o "IOE-Creative-Studio-GitHub-Ready.zip" \
-            -d /tmp/ioe-project
+          echo "Extracting IOE Creative Studio ZIP..."
+          unzip -o "IOE-Creative-Studio-GitHub-Ready.zip" -d /tmp/ioe-project
 
-          echo "=== Extracted IOE project ==="
-          find /tmp/ioe-project -maxdepth 4 -type f | sort
+          echo ""
+          echo "Extracted files:"
+          find /tmp/ioe-project -maxdepth 4 -type f | head -200
 
-      - name: Detect IOE project
+      - name: Find project root
         run: |
-          if [ -f "/tmp/ioe-project/worker.ts" ] && \
-             [ -f "/tmp/ioe-project/wrangler.toml" ]; then
-            echo "Cloudflare Worker project detected."
-            echo "PROJECT_ROOT=/tmp/ioe-project" >> "$GITHUB_ENV"
+          echo "Searching for project root..."
 
-          elif [ -f "/tmp/ioe-project/package.json" ]; then
-            echo "Node/Vite project detected."
-            echo "PROJECT_ROOT=/tmp/ioe-project" >> "$GITHUB_ENV"
+          PROJECT_ROOT=""
 
+          PACKAGE_JSON=$(find /tmp/ioe-project -name package.json -type f | head -1)
+
+          if [ -n "$PACKAGE_JSON" ]; then
+            PROJECT_ROOT=$(dirname "$PACKAGE_JSON")
           else
-            echo "ERROR: No supported IOE project structure found."
+            WORKER_FILE=$(find /tmp/ioe-project -name worker.ts -type f | head -1)
+
+            if [ -n "$WORKER_FILE" ]; then
+              PROJECT_ROOT=$(dirname "$WORKER_FILE")
+            else
+              WRANGLER_FILE=$(find /tmp/ioe-project -name wrangler.toml -type f | head -1)
+
+              if [ -n "$WRANGLER_FILE" ]; then
+                PROJECT_ROOT=$(dirname "$WRANGLER_FILE")
+              fi
+            fi
+          fi
+
+          if [ -z "$PROJECT_ROOT" ]; then
+            echo "Could not determine project root."
+            echo "ZIP contents:"
+            find /tmp/ioe-project -maxdepth 4 -type f
             exit 1
           fi
 
+          echo "Project root found:"
+          echo "$PROJECT_ROOT"
+
+          echo "PROJECT_ROOT=$PROJECT_ROOT" >> "$GITHUB_ENV"
+
       - name: Copy project files
         run: |
-          echo "=== Copying IOE project ==="
+          echo "Copying project files from:"
+          echo "$PROJECT_ROOT"
 
           rsync -av \
             --exclude='.git/' \
@@ -56,22 +78,23 @@ jobs:
             --exclude='node_modules/' \
             "$PROJECT_ROOT/" ./
 
-      - name: Show final project structure
+      - name: Show repository contents
         run: |
-          echo "=== Final IOE project structure ==="
+          echo "Repository after extraction:"
           find . -maxdepth 3 -type f \
-            ! -path './.git/*' | sort | head -300
+            ! -path './.git/*' \
+            | sort | head -200
 
       - name: Commit extracted project
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -A
+          git add .
 
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "No new files to commit."
           else
-            git commit -m "Extract IOE Creative Studio project [skip ci]"
+            git commit -m "Extract GitHub-ready IOE Creative Studio project"
             git push
           fi
