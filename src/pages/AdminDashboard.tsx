@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product, PricingPackage } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Star, LogOut, Database, X, Check, Settings, Image as ImageIcon, Briefcase, FileText, LayoutTemplate, HelpCircle, MessageSquare, Scale, CreditCard } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Star, LogOut, Database, X, Check, Settings, Image as ImageIcon, Briefcase, FileText, LayoutTemplate, HelpCircle, MessageSquare, Scale, CreditCard, Globe } from 'lucide-react';
 import { getSupabase } from '../lib/supabase';
 import { AdminServices } from '../components/admin/AdminServices';
 import { AdminTestimonials } from '../components/admin/AdminTestimonials';
@@ -15,9 +15,10 @@ import { AdminMedia } from '../components/admin/AdminMedia';
 import { AdminQuoteRequests } from '../components/admin/AdminQuoteRequests';
 import { AdminLegalPolicies } from '../components/admin/AdminLegalPolicies';
 import { AdminPayments } from '../components/admin/AdminPayments';
+import { AdminWebsiteDemos } from '../components/admin/AdminWebsiteDemos';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'products' | 'packages' | 'home' | 'about' | 'services' | 'portfolio' | 'testimonials' | 'faqs' | 'quotes' | 'contact' | 'branding' | 'media' | 'legal' | 'payments'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'packages' | 'home' | 'about' | 'services' | 'portfolio' | 'demos' | 'testimonials' | 'faqs' | 'quotes' | 'contact' | 'branding' | 'media' | 'legal' | 'payments'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [packages, setPackages] = useState<PricingPackage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -642,19 +643,15 @@ const handleLogout = async () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30 font-sans">
       <nav className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-bold flex items-center">
-            <Database className="w-5 h-5 mr-3 text-teal-600" />
-            IOE Studio Management
+          <Database className="w-5 h-5 mr-3 text-teal-600" />
+          IOE Studio Management
         </h1>
         
-          <button type="button"
-            onClick={() => setActiveTab('portfolio')}
-            className={`whitespace-nowrap px-4 py-2 text-sm font-bold transition-colors rounded-t-lg ${activeTab === 'portfolio' ? 'bg-slate-100 text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-          >
-            <Briefcase className="w-4 h-4 inline-block mr-1" /> Portfolio
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={handleLogout} className="flex items-center text-sm hover:text-slate-300 transition-colors">
+            <LogOut className="w-4 h-4 mr-2" /> Logout
           </button>
-<button type="button" onClick={handleLogout} className="flex items-center text-sm hover:text-slate-600">
-          <LogOut className="w-4 h-4 mr-2" /> Logout
-        </button>
+        </div>
       </nav>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -685,6 +682,18 @@ const handleLogout = async () => {
             className={`whitespace-nowrap px-4 py-2 text-sm font-bold transition-colors rounded-t-lg ${activeTab === 'products' ? 'bg-slate-100 text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
           >
             <Briefcase className="w-4 h-4 inline-block mr-1" /> Products
+          </button>
+          <button type="button" 
+            onClick={() => setActiveTab('portfolio')} 
+            className={`whitespace-nowrap px-4 py-2 text-sm font-bold transition-colors rounded-t-lg ${activeTab === 'portfolio' ? 'bg-slate-100 text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+          >
+            <Briefcase className="w-4 h-4 inline-block mr-1" /> Portfolio
+          </button>
+          <button type="button" 
+            onClick={() => setActiveTab('demos')} 
+            className={`whitespace-nowrap px-4 py-2 text-sm font-bold transition-colors rounded-t-lg ${activeTab === 'demos' ? 'bg-slate-100 text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+          >
+            <Globe className="w-4 h-4 inline-block mr-1" /> Website Demos
           </button>
           <button type="button" 
             onClick={() => setActiveTab('packages')} 
@@ -765,6 +774,7 @@ const handleLogout = async () => {
 
         {activeTab === 'services' && <AdminServices setError={setError} showSuccess={showSuccess} />}
         {activeTab === 'portfolio' && <AdminPortfolio setError={setError} showSuccess={showSuccess} />}
+        {activeTab === 'demos' && <AdminWebsiteDemos setError={setError} showSuccess={showSuccess} />}
         {activeTab === 'media' && <AdminMedia setError={setError} showSuccess={showSuccess} />}
         {activeTab === 'home' && <AdminHome setError={setError} showSuccess={showSuccess} />}
         {activeTab === 'about' && <AdminAbout setError={setError} showSuccess={showSuccess} />}

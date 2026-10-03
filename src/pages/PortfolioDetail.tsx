@@ -4,16 +4,26 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getSupabase } from '../lib/supabase';
 import { Product } from '../types';
+import { WEBSITE_DEMOS } from '../data/websiteDemos';
 
 export default function PortfolioDetail() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
+  const projectId = id || slug;
   const navigate = useNavigate();
   const [project, setProject] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchProject() {
-      if (!id) return;
+      if (!projectId) return;
+
+      // Check if this slug or ID belongs to any website demo (all 10 categories supported)
+      const matchedDemo = WEBSITE_DEMOS.find(d => d.slug === projectId || d.id === projectId);
+      if (matchedDemo) {
+        navigate(`/portfolio/demos/${matchedDemo.slug}`, { replace: true });
+        return;
+      }
+
       const supabase = getSupabase();
       if (!supabase) {
         setLoading(false);
@@ -23,7 +33,7 @@ export default function PortfolioDetail() {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .eq('id', id)
+          .eq('id', projectId)
           .single();
           
         if (error) throw error;
@@ -40,7 +50,7 @@ export default function PortfolioDetail() {
       }
     }
     fetchProject();
-  }, [id, navigate]);
+  }, [projectId, navigate]);
 
   if (loading) {
     return (

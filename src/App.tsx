@@ -21,6 +21,7 @@ import ClientAgreement from './pages/ClientAgreement';
 import DynamicLegalPolicy from './pages/DynamicLegalPolicy';
 import RequestQuote from './pages/RequestQuote';
 import PortfolioDetail from './pages/PortfolioDetail';
+import WebsiteDemoDetail from './pages/WebsiteDemoDetail';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -55,6 +56,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/portfolio/demos/:slug" element={<WebsiteDemoDetail />} />
+          <Route path="/portfolio/demo/:slug" element={<WebsiteDemoDetail />} />
           <Route path="/portfolio/:slug" element={<PortfolioDetail />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           <Route path="/skills" element={<Skills />} />
