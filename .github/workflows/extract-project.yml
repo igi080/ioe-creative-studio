@@ -22,25 +22,32 @@ jobs:
           rm -rf /tmp/ioe-project
           mkdir -p /tmp/ioe-project
 
-          unzip -o "IOE-Creative-Studio-GitHub-Ready.zip" -d /tmp/ioe-project
+          unzip -o "IOE-Creative-Studio-GitHub-Ready.zip" \
+            -d /tmp/ioe-project
 
-          echo "Extracted files:"
-          find /tmp/ioe-project -maxdepth 3 -type f | head -100
+          echo "=== Extracted IOE project ==="
+          find /tmp/ioe-project -maxdepth 4 -type f | sort
 
-      - name: Find project root
+      - name: Detect IOE project
         run: |
-          PROJECT_ROOT=$(dirname "$(find /tmp/ioe-project -name package.json -type f | head -1)")
+          if [ -f "/tmp/ioe-project/worker.ts" ] && \
+             [ -f "/tmp/ioe-project/wrangler.toml" ]; then
+            echo "Cloudflare Worker project detected."
+            echo "PROJECT_ROOT=/tmp/ioe-project" >> "$GITHUB_ENV"
 
-          if [ -z "$PROJECT_ROOT" ] || [ "$PROJECT_ROOT" = "." ]; then
-            echo "Could not find package.json inside the ZIP."
+          elif [ -f "/tmp/ioe-project/package.json" ]; then
+            echo "Node/Vite project detected."
+            echo "PROJECT_ROOT=/tmp/ioe-project" >> "$GITHUB_ENV"
+
+          else
+            echo "ERROR: No supported IOE project structure found."
             exit 1
           fi
 
-          echo "PROJECT_ROOT=$PROJECT_ROOT" >> "$GITHUB_ENV"
-          echo "Project root: $PROJECT_ROOT"
-
       - name: Copy project files
         run: |
+          echo "=== Copying IOE project ==="
+
           rsync -av \
             --exclude='.git/' \
             --exclude='.github/' \
@@ -49,16 +56,22 @@ jobs:
             --exclude='node_modules/' \
             "$PROJECT_ROOT/" ./
 
+      - name: Show final project structure
+        run: |
+          echo "=== Final IOE project structure ==="
+          find . -maxdepth 3 -type f \
+            ! -path './.git/*' | sort | head -300
+
       - name: Commit extracted project
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add .
+          git add -A
 
           if git diff --cached --quiet; then
-            echo "No new files to commit."
+            echo "No changes to commit."
           else
-            git commit -m "Extract GitHub-ready IOE Creative Studio project"
+            git commit -m "Extract IOE Creative Studio project [skip ci]"
             git push
           fi
