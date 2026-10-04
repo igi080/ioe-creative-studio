@@ -7,7 +7,7 @@ import {
   Search, 
   Sparkles, 
   Share2, 
-  href={demoUrl}, 
+  
   CheckCircle2, 
   MessageSquare,
     Clock,
