@@ -12,8 +12,7 @@ import {
   MessageSquare,
     Clock,
   Layers,
-  ShieldCheck,
-  Send
+    Send
 } from 'lucide-react';
 import { WEBSITE_DEMOS, DEMO_CATEGORIES, WebsiteDemo } from '../../data/websiteDemos';
 
