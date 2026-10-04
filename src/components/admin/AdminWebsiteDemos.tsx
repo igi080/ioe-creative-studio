@@ -7,10 +7,10 @@ import {
   Search, 
   Sparkles, 
   Share2, 
-  ArrowRight, 
+  href={demoUrl}, 
   CheckCircle2, 
   MessageSquare,
-  Clock,
+    Clock,
   Layers,
   ShieldCheck,
   Send
