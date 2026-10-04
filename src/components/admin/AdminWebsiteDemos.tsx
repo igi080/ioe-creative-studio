@@ -40,12 +40,10 @@ export function AdminWebsiteDemos({ setError, showSuccess }: AdminWebsiteDemosPr
     return matchesCategory && matchesSearch;
   });
 
-  const getFullDemoUrl = (slug: string) => {
-    const origin = typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null'
-      ? window.location.origin
-      : 'https://ioecreativestudio.com';
-    return `${origin}/portfolio/demos/${slug}`;
-  };
+const getFullDemoUrl = (slug: string) => {
+  return `https://ioe-creative-studio.vercel.app/portfolio/demos/${slug}`;
+};
+
 
   const buildWhatsAppMessage = (demo: WebsiteDemo, demoUrl: string) => {
     return `Hello! Here is a sample website design concept from IOE Creative Studio for your review:\n\n*${demo.title}* (${demo.category})\n${demo.shortDescription}\n\n👉 View Live Demo: ${demoUrl}\n\nLet us know if you'd like us to customize this design for your business!`;
@@ -317,7 +315,7 @@ export function AdminWebsiteDemos({ setError, showSuccess }: AdminWebsiteDemosPr
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
                     {/* View Demo Button */}
                     <a
-                      href={`/portfolio/demos/${demo.slug}`}
+                      href={demoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors shadow-xs"
