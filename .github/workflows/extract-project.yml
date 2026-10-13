@@ -16,7 +16,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install Google Drive downloader
+        run: python -m pip install gdown
 
+      - name: Download project ZIP from Google Drive
+        run: |
+          gdown "https://drive.google.com/uc?id=10IBvZaHx8ny9fD2_XXpYDZmmw9wfRbUc" -O IOE-Creative-Studio-GitHub-Ready.zip
+          test -s IOE-Creative-Studio-GitHub-Ready.zip
+          unzip -t IOE-Creative-Studio-GitHub-Ready.zip
       - name: Extract project ZIP
         run: |
           rm -rf /tmp/ioe-project
