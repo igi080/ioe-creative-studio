@@ -18,8 +18,19 @@ app.use(express.json({
 }));
 const PORT = 3000;
 
+// Helper to normalize Supabase project URL
+export function normalizeSupabaseUrl(url?: string): string {
+  if (!url) return '';
+  let cleaned = url.trim().replace(/\/+$/, '');
+  if (cleaned.endsWith('/rest/v1')) {
+    cleaned = cleaned.slice(0, -'/rest/v1'.length).replace(/\/+$/, '');
+  }
+  return cleaned;
+}
+
 // Initialize Supabase Clients (Server-side)
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const rawSupabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+const supabaseUrl = normalizeSupabaseUrl(rawSupabaseUrl);
 const supabaseAnonKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
 
@@ -865,6 +876,10 @@ app.post("/api/delete-media", verifyAdmin, async (req: express.Request, res: exp
   }
 });
 
+// Export Express app for Vercel serverless integration
+export { app };
+export default app;
+
 async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
@@ -891,4 +906,7 @@ async function startServer() {
   });
 }
 
-startServer().catch(console.error);
+// Only start the standalone HTTP listener if not running within a serverless runtime (e.g. Vercel)
+if (!process.env.VERCEL && !process.env.NOW_REGION) {
+  startServer().catch(console.error);
+}

@@ -21,7 +21,8 @@ import {
   RefreshCw,
   Copy,
   Check,
-  Globe
+  Globe,
+  GraduationCap
 } from 'lucide-react';
 import { getSupabase } from '../../lib/supabase';
 import { QuoteRequest, QuoteStatus } from '../../types';
@@ -387,7 +388,8 @@ export function AdminQuoteRequests({ setError, showSuccess }: AdminQuoteRequests
         q.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.company?.toLowerCase().includes(searchTerm.toLowerCase());
+        q.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        q.additional_requirements?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'all' || q.status === statusFilter;
 
@@ -635,6 +637,21 @@ export function AdminQuoteRequests({ setError, showSuccess }: AdminQuoteRequests
                         )}
                         {(() => {
                           const attr = parseAttributionFromText(quote.additional_requirements);
+                          const rawReq = quote.additional_requirements?.toLowerCase() || '';
+                          const isSchoolDemo = 
+                            quote.service === 'School Website and Online Result Portal' ||
+                            attr?.utm_source?.toLowerCase().includes('school') ||
+                            rawReq.includes('school result portal');
+
+                          if (isSchoolDemo) {
+                            return (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs">
+                                <GraduationCap className="w-3 h-3 text-purple-600" />
+                                School Result Portal Demo
+                              </span>
+                            );
+                          }
+
                           const src = attr?.utm_source?.toLowerCase();
                           if (src) {
                             return (
@@ -654,7 +671,11 @@ export function AdminQuoteRequests({ setError, showSuccess }: AdminQuoteRequests
 
                     {/* Service */}
                     <td className="px-6 py-4">
-                      <span className="font-semibold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-1 rounded-md text-xs">
+                      <span className={`font-semibold px-2.5 py-1 rounded-md text-xs border ${
+                        quote.service === 'School Website and Online Result Portal'
+                          ? 'text-purple-800 bg-purple-50 border-purple-200 font-bold'
+                          : 'text-teal-700 bg-teal-50 border border-teal-200/80'
+                      }`}>
                         {quote.service}
                       </span>
                       {quote.budget && (

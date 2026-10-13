@@ -18,6 +18,12 @@ export interface WebsiteDemo {
   isAvailable: boolean;
 }
 
+export const PRODUCTION_DOMAIN = 'https://ioe-creative-studio.vercel.app';
+
+export function getPublicDemoUrl(slug: string): string {
+  return `${PRODUCTION_DOMAIN}/portfolio/demos/${slug}`;
+}
+
 export const DEMO_CATEGORIES = [
   { slug: 'all', label: 'All Demos' },
   { slug: 'business-corporate', label: 'Business / Corporate' },
@@ -66,6 +72,42 @@ export const WEBSITE_DEMOS: WebsiteDemo[] = [
       { title: 'Executive Brand Positioning', desc: 'Crafted with premium typography, deep corporate blues, and crisp whitespace.' },
       { title: 'Lead Capture & WhatsApp', desc: 'Instant WhatsApp direct routing ensures prospects reach your sales desk immediately.' },
       { title: 'Cross-Device Responsiveness', desc: 'Pixel-perfect rendering across iPhones, Android tablets, iPads, and high-resolution monitors.' }
+    ],
+    isAvailable: true
+  },
+  {
+    id: 'demo-school-result-portal',
+    slug: 'school-result-portal',
+    title: 'School Result Portal',
+    category: 'School Website',
+    categorySlug: 'school',
+    badge: 'DEMO',
+    shortDescription: 'Secure Online Result Checking for Students & Parents',
+    fullDescription: 'A secure, interactive student examination result portal designed for Nigerian private schools, colleges, and international academies. Allows school proprietors to experience how parents and students check terminal report cards on smartphones using a unique student PIN and registration number.',
+    targetAudience: 'Private Primary & Secondary Schools, Colleges, International Academies, and Educational Proprietors.',
+    deliveryTime: '5 – 7 Business Days',
+    image: '/images/school_result_portal.jpg',
+    features: [
+      'Student PIN verification',
+      'Instant mobile result check',
+      'Continuous assessment (CA)',
+      'Terminal exam report sheet',
+      'A4 print & PDF download',
+      'Class position & remarks'
+    ],
+    pagesIncluded: [
+      'Student PIN & Reg No Checker Portal',
+      'Verified Terminal Result Sheet',
+      'CA (30) & Exam (70) Score Breakdown',
+      'Class Position, Average & Attendance',
+      'Teacher & Principal Certified Remarks',
+      'Official School Digital Stamp & Print View'
+    ],
+    techStack: ['React / Vite', 'Tailwind CSS', 'Mobile-First Smartphone Optimized', 'WAEC/NECO Grading Engine', 'Instant Browser Print/PDF'],
+    highlights: [
+      { title: 'Scratch Card & PIN Security', desc: 'Prevents unauthorized result tampering with unique student PINs and session authentication.' },
+      { title: 'Smartphone-Optimized Report', desc: 'Proprietors and parents experience frictionless mobile result checking with zero pinch-to-zoom.' },
+      { title: 'Official Certified Print Layout', desc: 'Generates clean, printable A4 terminal report sheets with school crest and principal signature.' }
     ],
     isAvailable: true
   },

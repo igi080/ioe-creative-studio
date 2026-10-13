@@ -48,17 +48,17 @@ function matchesCategory(projectCategory: string | null | undefined, selectedCat
 
   switch (sNorm) {
     case 'graphic design':
-      return pNorm === 'graphic design' || pNorm === 'graphic' || pNorm === 'graphics' || pNorm.includes('graphic');
+      return pNorm === 'graphic design' || pNorm === 'graphic' || pNorm === 'graphics' || pNorm.includes('graphic') || pNorm.includes('flyer');
     case 'branding':
-      return pNorm === 'branding' || pNorm === 'brand' || pNorm === 'brand identity' || pNorm.includes('brand');
+      return pNorm === 'branding' || pNorm === 'brand' || pNorm === 'brand identity' || pNorm.includes('brand') || pNorm.includes('logo');
     case 'motion graphics':
       return pNorm === 'motion graphics' || pNorm === 'motion' || pNorm === 'motion graphic' || pNorm.includes('motion');
     case 'animation':
       return pNorm === 'animation' || pNorm === '2d animation' || pNorm === '3d animation' || pNorm === 'anim' || pNorm.includes('animat');
     case 'web development':
-      return pNorm === 'web development' || pNorm === 'web dev' || pNorm === 'webdev' || pNorm === 'website' || pNorm === 'web' || pNorm === 'web design' || pNorm.includes('web');
+      return pNorm === 'web development' || pNorm === 'web dev' || pNorm === 'webdev' || pNorm === 'website' || pNorm === 'web' || pNorm === 'web design' || pNorm.includes('web') || pNorm.includes('app');
     case 'creative projects':
-      return pNorm === 'creative projects' || pNorm === 'creative project' || pNorm === 'creative' || pNorm.includes('creative');
+      return pNorm === 'creative projects' || pNorm === 'creative project' || pNorm === 'creative' || pNorm.includes('creative') || pNorm.includes('photo') || pNorm.includes('studio');
     default:
       return pNorm === sNorm;
   }
@@ -82,8 +82,131 @@ export default function Portfolio() {
     return searchParams.get('demoCategory') || 'all';
   });
 
-  const [projects, setProjects] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+const FALLBACK_PUBLISHED_PROJECTS: Product[] = [
+  {
+    id: '1c8b65c1-4cd1-4449-84b4-d3e41d81ba86',
+    name: 'Android  phone app. Creation',
+    category: 'Android app creation and design ',
+    description: 'App creation for business and services ',
+    price: 'Contact for price',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/7d8bc75b-04e7-4635-96f5-fec6650d3b53-39181.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789305521148
+  },
+  {
+    id: '79039e9b-d6dc-49e8-8095-84260a277243',
+    name: 'School website creation  and design ',
+    category: 'Website Design ',
+    description: 'School website design available at affordable prices ',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/5775d624-127f-4e62-ac48-18aa453b3fc6-39183.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789375378397
+  },
+  {
+    id: 'a00065cf-45fa-4ea0-8e2c-fe386ca2459d',
+    name: 'E commerce  website design ',
+    category: 'Static And  Dynamic website Design ',
+    description: 'E commerce website design for personal and corporate businesses are available at affordable price',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/5941e2a8-7429-46e8-9e11-20fd5d4491c8-39189.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789466034741
+  },
+  {
+    id: '23175ef9-bf49-4125-a479-9b14d81115cf',
+    name: 'Website Design ',
+    category: 'Personal portfolio website Design ',
+    description: 'Personal website portfolio design are available at affordable price ',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/d0a3a60a-746f-4d68-acd4-65f8fc046833-39187.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789302652523
+  },
+  {
+    id: '6d8ea89a-c0ab-4742-b43e-2cd7b0dc8637',
+    name: 'Graphics Design ',
+    category: 'Flyers',
+    description: 'Different kinds of church flyers are available ',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/29e6e434-6392-4d59-80d8-347a8828c2f0-39189.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789503869669
+  },
+  {
+    id: 'e6c15206-9ada-4d00-a6ae-233db578beab',
+    name: 'Graphics designs',
+    category: 'School and Business flyers',
+    description: 'Flyers for schools , restaurants , individual and  corporate business are available at affordable prices',
+    price: 'Contact for affordable prices ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/025a795c-fdf9-4398-a025-bc25d371d917-39187.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789308946007
+  },
+  {
+    id: 'd207eb30-d103-43f6-99fd-b97e7cd67fdf',
+    name: 'Professional studio photo shoot and editing Photo',
+    category: 'Professional photo studio photo  Shoot and Photo editing  ',
+    description: 'Professional photo studio photo  Shoot and Photo editing For your   personal profile ,Birthday,Naming , Graduation,, Coronation , funeral  , Retirement  events. etc  are available at affordable prices ',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/8c3b04e4-08c9-4f83-8244-3429ea8f2966-39186.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789213787449
+  },
+  {
+    id: 'c7915687-eec4-4a7c-a0c6-6cbfc697530a',
+    name: 'Logo Designs  Animation ',
+    category: 'Graphics Design ',
+    description: 'Personal and corporate log Designs are available at affordable prices ',
+    price: 'Contact for the price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/2ec63bce-6ec0-479d-a5c0-6328c49a6ce0-39184.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789409627325
+  },
+  {
+    id: 'bbce3410-ab16-4461-947a-33a92dd206f3',
+    name: 'Animation ,Logo Designs ',
+    category: 'Graphics ',
+    description: 'Professional logo Designs and Animations are available at affordable prices ',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/253b0b86-9503-4dc0-a738-8ddfc8607c07-39185.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789308417209
+  },
+  {
+    id: 'e37e93d6-4384-4f85-8ed8-8c8b9ce28365',
+    name: 'Motion Graphics And Business Advertisement ',
+    category: 'Static and motion graphics designs and advertisement ',
+    description: 'Static and Motion Graphics video advertisements are  available at affordable price',
+    price: 'Contact for price ',
+    image: 'https://pub-24582a54e2714c96a2baaaf19911cd68.r2.dev/products/e39708d9-3a3a-4e9d-9d64-3cd58ee5fa65-39183.png',
+    isFeatured: true,
+    isPublished: true,
+    order: 0,
+    createdAt: 1789302328601
+  }
+];
+
+  const [projects, setProjects] = useState<Product[]>(FALLBACK_PUBLISHED_PROJECTS);
+  const [loading, setLoading] = useState(false);
 
   // SEO setup
   useEffect(() => {
@@ -130,9 +253,12 @@ export default function Portfolio() {
         .order('order', { ascending: true });
 
       if (error) throw error;
-      setProjects(data || []);
+      if (data && data.length > 0) {
+        setProjects(data);
+      }
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      console.error('Error fetching projects from Supabase:', error);
+      // Keep FALLBACK_PUBLISHED_PROJECTS so users never see 0 projects
     } finally {
       setLoading(false);
     }
@@ -386,12 +512,18 @@ export default function Portfolio() {
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
               Website Demos
             </h2>
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed mb-4">
               Explore sample website designs created by IOE Creative Studio. Choose a design direction and let us customize it for your business.
             </p>
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-stone-200 shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Showing <strong className="text-slate-900">{filteredDemos.length}</strong> of {WEBSITE_DEMOS.length} website demos
+              </span>
+            </div>
           </div>
 
-          {/* 10 Category Filter Pills */}
+          {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar justify-start sm:justify-center">
             {DEMO_CATEGORIES.map((cat) => {
               const isSelected = activeDemoCategory === cat.slug;
@@ -415,7 +547,9 @@ export default function Portfolio() {
           {/* Website Demo Cards Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredDemos.map((demo, idx) => {
-              const quoteUrl = `/request-quote?demo=${encodeURIComponent(demo.title)}&category=${encodeURIComponent(demo.category)}`;
+              const quoteUrl = demo.slug === 'school-result-portal'
+                ? `/request-quote?service=${encodeURIComponent('School Website and Online Result Portal')}&source=${encodeURIComponent('School Result Portal Demo')}&demo=${encodeURIComponent(demo.title)}`
+                : `/request-quote?demo=${encodeURIComponent(demo.title)}&category=${encodeURIComponent(demo.category)}`;
               const detailUrl = `/portfolio/demos/${demo.slug}`;
 
               return (
@@ -434,8 +568,8 @@ export default function Portfolio() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        if (target.src !== '/images/ioe_web_showcase.jpg') {
-                          target.src = '/images/ioe_web_showcase.jpg';
+                        if (target.src !== '/images/ioe_branding_showcase.jpg') {
+                          target.src = '/images/ioe_branding_showcase.jpg';
                         }
                       }}
                     />

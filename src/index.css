@@ -38,11 +38,22 @@ body {
   }
 
   /* Optimize document view for paper & PDF export */
-  #legal-document-view {
+  #legal-document-view,
+  #official-school-result-sheet {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     min-height: auto !important;
     background: transparent !important;
+  }
+
+  #official-school-result-sheet {
+    border: 1.5px solid #1e3a8a !important;
+    box-shadow: none !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 
   h1, h2, h3, h4 {

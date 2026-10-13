@@ -63,7 +63,7 @@ export interface Testimonial {
   client_image?: string;
   image?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface Faq {

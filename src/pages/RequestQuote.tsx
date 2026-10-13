@@ -16,14 +16,16 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  Clock
+  Clock,
+  GraduationCap
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getSupabase } from '../lib/supabase';
 import { Service } from '../types';
 import { trackQuoteStarted, trackQuoteSubmitted, getUtmAttribution, formatAttributionForSubmission } from '../lib/analytics';
 
 const defaultServices = [
+  'School Website and Online Result Portal',
   'Graphic Design',
   'Branding & Logo Design',
   'Motion Graphics',
@@ -45,6 +47,22 @@ const budgetRanges = [
 ];
 
 export default function RequestQuote() {
+  const [searchParams] = useSearchParams();
+  const serviceParam = searchParams.get('service');
+  const demoParam = searchParams.get('demo');
+  const sourceParam = searchParams.get('source');
+  const companyParam = searchParams.get('company');
+
+  const isSchoolPortalLead = 
+    serviceParam === 'School Website and Online Result Portal' ||
+    demoParam === 'School Result Portal' ||
+    sourceParam === 'School Result Portal Demo' ||
+    searchParams.get('category') === 'School Website';
+
+  const initialService = isSchoolPortalLead
+    ? 'School Website and Online Result Portal'
+    : (serviceParam || '');
+
   const [availableServices, setAvailableServices] = useState<string[]>(defaultServices);
   const [isServicesLoading, setIsServicesLoading] = useState(true);
 
@@ -61,7 +79,7 @@ export default function RequestQuote() {
   const referenceFileNameRef = useRef<HTMLInputElement>(null);
 
   // Selection & Option States (only update on direct user selection, not per-keystroke)
-  const [service, setService] = useState('');
+  const [service, setService] = useState(initialService);
   const [budget, setBudget] = useState('');
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [showReferenceFileName, setShowReferenceFileName] = useState(false);
@@ -88,6 +106,24 @@ export default function RequestQuote() {
     });
   };
 
+  // Pre-fill fields if arriving from School Result Portal Demo or custom parameters
+  useEffect(() => {
+    if (isSchoolPortalLead) {
+      if (!service) {
+        setService('School Website and Online Result Portal');
+      }
+      if (companyParam && companyRef.current && !companyRef.current.value) {
+        companyRef.current.value = companyParam;
+      }
+      if (projectDescriptionRef.current && !projectDescriptionRef.current.value) {
+        projectDescriptionRef.current.value = 
+          'We want to implement a customized School Website & Online Result Portal with student PIN verification, academic terms, and administrative records management for our institution.';
+      }
+    } else if (serviceParam && !service) {
+      setService(serviceParam);
+    }
+  }, [isSchoolPortalLead, serviceParam, companyParam, service]);
+
   // Fetch active services from Supabase if available
   useEffect(() => {
     async function loadServices() {
@@ -105,6 +141,10 @@ export default function RequestQuote() {
         
         if (!error && data && data.length > 0) {
           const fetchedTitles = data.map((s: { title: string }) => s.title);
+          // Ensure School Website and Online Result Portal is available
+          if (!fetchedTitles.includes('School Website and Online Result Portal')) {
+            fetchedTitles.unshift('School Website and Online Result Portal');
+          }
           // Append 'Other' if not in list
           if (!fetchedTitles.includes('Other')) {
             fetchedTitles.push('Other');
@@ -197,17 +237,23 @@ export default function RequestQuote() {
 
       // Capture campaign attribution (UTMs, referrer, landing page) safely
       const utmAttribution = getUtmAttribution();
+      if (isSchoolPortalLead) {
+        utmAttribution.utm_source = 'School Result Portal Demo';
+        utmAttribution.utm_campaign = utmAttribution.utm_campaign || 'school_result_portal_funnel';
+        utmAttribution.utm_medium = utmAttribution.utm_medium || 'interactive_demo';
+      } else if (sourceParam) {
+        utmAttribution.utm_source = sourceParam;
+      }
       const attributionText = formatAttributionForSubmission(utmAttribution);
 
+      // Explicit lead source label for immediate visibility in admin dashboard
+      const leadSourceNote = isSchoolPortalLead
+        ? '[Lead Source: School Result Portal Demo]'
+        : (sourceParam ? `[Lead Source: ${sourceParam}]` : '');
+
       // Combine user requirements with campaign attribution in existing additional_requirements column
-      let finalAdditionalRequirements: string | null = null;
-      if (addReqVal && attributionText) {
-        finalAdditionalRequirements = `${addReqVal}\n\n${attributionText}`;
-      } else if (attributionText) {
-        finalAdditionalRequirements = attributionText;
-      } else if (addReqVal) {
-        finalAdditionalRequirements = addReqVal;
-      }
+      const notesParts = [addReqVal, leadSourceNote, attributionText].filter(Boolean);
+      const finalAdditionalRequirements = notesParts.length > 0 ? notesParts.join('\n\n') : null;
 
       // Map exactly to existing public.quote_requests columns
       // Omit status, id, created_at, updated_at so database defaults apply
@@ -439,20 +485,85 @@ export default function RequestQuote() {
               </div>
             )}
 
+            {/* School Result Portal Lead Acquisition Banner */}
+            {isSchoolPortalLead && (
+              <div className="mb-10 p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/70 to-purple-50 border border-blue-200 shadow-sm text-slate-800 animate-fadeIn">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-sm">
+                      <GraduationCap className="w-5 h-5 text-amber-300" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-800 bg-blue-100/90 border border-blue-200 px-2.5 py-0.5 rounded-full inline-block">
+                        School Portal Lead Funnel
+                      </span>
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                        School Website & Online Result Portal Commissioning
+                      </h3>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-blue-700 bg-white px-3 py-1 rounded-xl border border-blue-200">
+                    Lead Source: School Result Portal Demo
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">
+                  Thank you for testing our interactive result checker demo. Below are the <strong>proposed production features</strong> IOE Creative Studio customizes and deploys for your institution:
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-700">
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Online Result Checking:</strong> Tamper-proof PIN and student registration number authentication.</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>School Branding:</strong> Your official crest, school colors, motto, address and principal stamps.</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Student Records:</strong> Secure student directory, class arms (SS 1–3, JSS 1–3, Primary), and profiles.</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Sessions & Terms:</strong> 1st, 2nd & 3rd term scheduling with multi-year archives.</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Subject Scores:</strong> Continuous Assessment (CA), terminal exam marks & WAEC/NECO grading.</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Printable Results:</strong> High-resolution A4 printable & downloadable terminal report cards.</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-xl border border-blue-100/80 sm:col-span-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Administrator Management Desk:</strong> Protected portal for teachers and proprietors to enter scores, issue PINs, and publish results.</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-blue-200/60 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+                  <span>*Fictional demo data used in preview. Real school records are completely isolated in dedicated secure storage upon deployment.</span>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} noValidate className="space-y-10">
               
               {/* Part 1: Client Information */}
               <div>
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-stone-200">
                   <User className="w-5 h-5 text-teal-600" />
-                  <h2 className="text-lg font-bold text-slate-900">1. Client Information</h2>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    {isSchoolPortalLead ? '1. School Proprietor / Administrator Information' : '1. Client Information'}
+                  </h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {/* Full Name */}
                   <div className="sm:col-span-2">
                     <label htmlFor="fullName" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                      Full Name <span className="text-rose-500">*</span>
+                      {isSchoolPortalLead ? 'Proprietor / Representative Full Name' : 'Full Name'} <span className="text-rose-500">*</span>
                     </label>
                     <input
                       id="fullName"
@@ -460,7 +571,7 @@ export default function RequestQuote() {
                       defaultValue=""
                       type="text"
                       onChange={() => clearError('fullName')}
-                      placeholder="e.g. Alexandra Smith"
+                      placeholder={isSchoolPortalLead ? 'e.g. Dr. (Mrs.) A. O. Balogun' : 'e.g. Alexandra Smith'}
                       className={`w-full px-4 py-3 bg-stone-50 border rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-colors text-sm ${
                         errors.fullName ? 'border-rose-400 input-error ring-1 ring-rose-300' : 'border-stone-200'
                       }`}
@@ -481,7 +592,7 @@ export default function RequestQuote() {
                       defaultValue=""
                       type="email"
                       onChange={() => clearError('email')}
-                      placeholder="e.g. alexandra@example.com"
+                      placeholder={isSchoolPortalLead ? 'e.g. proprietor@school.edu.ng' : 'e.g. alexandra@example.com'}
                       className={`w-full px-4 py-3 bg-stone-50 border rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-colors text-sm ${
                         errors.email ? 'border-rose-400 input-error ring-1 ring-rose-300' : 'border-stone-200'
                       }`}
@@ -530,14 +641,14 @@ export default function RequestQuote() {
                   {/* Company */}
                   <div>
                     <label htmlFor="company" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                      Company / Organization <span className="text-slate-400 font-normal lowercase">(optional)</span>
+                      {isSchoolPortalLead ? 'School / Institution Name' : 'Company / Organization'} <span className="text-slate-400 font-normal lowercase">{isSchoolPortalLead ? '(e.g. Greenfield Academy)' : '(optional)'}</span>
                     </label>
                     <input
                       id="company"
                       ref={companyRef}
                       defaultValue=""
                       type="text"
-                      placeholder="e.g. Acme Ventures Ltd"
+                      placeholder={isSchoolPortalLead ? 'e.g. Greenfield International Academy' : 'e.g. Acme Ventures Ltd'}
                       className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-colors text-sm"
                     />
                   </div>

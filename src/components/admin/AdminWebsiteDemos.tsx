@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Globe, 
   ExternalLink, 
@@ -7,12 +8,12 @@ import {
   Search, 
   Sparkles, 
   Share2, 
-  
   CheckCircle2, 
   MessageSquare,
-    Clock,
+  Clock,
   Layers,
-    Send
+  Send,
+  ArrowRight
 } from 'lucide-react';
 import { WEBSITE_DEMOS, DEMO_CATEGORIES, WebsiteDemo } from '../../data/websiteDemos';
 
@@ -39,9 +40,9 @@ export function AdminWebsiteDemos({ setError, showSuccess }: AdminWebsiteDemosPr
     return matchesCategory && matchesSearch;
   });
 
-const getFullDemoUrl = (slug: string) => {
-  return `https://ioe-creative-studio.vercel.app/portfolio/demos/${slug}`;
-};
+  const getFullDemoUrl = (slug: string) => {
+    return `https://ioe-creative-studio.vercel.app/portfolio/demos/${slug}`;
+  };
 
 
   const buildWhatsAppMessage = (demo: WebsiteDemo, demoUrl: string) => {
@@ -186,7 +187,9 @@ const getFullDemoUrl = (slug: string) => {
         <div className="grid md:grid-cols-2 gap-6">
           {filteredDemos.map((demo) => {
             const demoUrl = getFullDemoUrl(demo.slug);
-            const quoteUrl = `/request-quote?demo=${encodeURIComponent(demo.title)}&category=${encodeURIComponent(demo.category)}`;
+            const quoteUrl = demo.slug === 'school-result-portal'
+              ? `/request-quote?service=${encodeURIComponent('School Website and Online Result Portal')}&source=${encodeURIComponent('School Result Portal Demo')}&demo=${encodeURIComponent(demo.title)}`
+              : `/request-quote?demo=${encodeURIComponent(demo.title)}&category=${encodeURIComponent(demo.category)}`;
             const isCopied = copiedSlug === demo.slug;
             const whatsappMessage = buildWhatsAppMessage(demo, demoUrl);
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
@@ -205,8 +208,8 @@ const getFullDemoUrl = (slug: string) => {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        if (target.src !== '/images/ioe_web_showcase.jpg') {
-                          target.src = '/images/ioe_web_showcase.jpg';
+                        if (target.src !== '/images/ioe_branding_showcase.jpg') {
+                          target.src = '/images/ioe_branding_showcase.jpg';
                         }
                       }}
                     />
@@ -318,7 +321,7 @@ const getFullDemoUrl = (slug: string) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors shadow-xs"
-                      title="Open live public demo in a new tab"
+                      title={`Open live public demo for "${demo.title}" at ${demoUrl}`}
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>View Demo</span>

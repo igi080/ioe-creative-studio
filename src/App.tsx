@@ -56,8 +56,16 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          {/* Explicit School Result Portal Routes */}
+          <Route path="/portfolio/demos/school-result-portal" element={<WebsiteDemoDetail forcedSlug="school-result-portal" />} />
+          <Route path="/portfolio/demo/school-result-portal" element={<WebsiteDemoDetail forcedSlug="school-result-portal" />} />
+          <Route path="/demos/school-result-portal" element={<WebsiteDemoDetail forcedSlug="school-result-portal" />} />
+          <Route path="/school-result-portal" element={<WebsiteDemoDetail forcedSlug="school-result-portal" />} />
+          {/* General Website Demo Routes */}
           <Route path="/portfolio/demos/:slug" element={<WebsiteDemoDetail />} />
           <Route path="/portfolio/demo/:slug" element={<WebsiteDemoDetail />} />
+          <Route path="/demos/:slug" element={<WebsiteDemoDetail />} />
+          <Route path="/demo/:slug" element={<WebsiteDemoDetail />} />
           <Route path="/portfolio/:slug" element={<PortfolioDetail />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           <Route path="/skills" element={<Skills />} />
